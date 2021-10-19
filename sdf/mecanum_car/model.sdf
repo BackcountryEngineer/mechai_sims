@@ -137,5 +137,8 @@
       </axis>
     </joint>
 
+    <plugin name="libtest_control_plugin" filename="libtest_control_plugin.so">
+      <velocity>0</velocity>
+    </plugin>
   </model>
 </sdf>
