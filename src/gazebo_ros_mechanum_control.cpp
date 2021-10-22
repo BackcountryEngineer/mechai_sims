@@ -1,4 +1,4 @@
-#include <gazebo_plugin_tutorials/gazebo_ros_mechanum_control.hpp>
+#include <mechai_sims/gazebo_ros_mechanum_control.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
@@ -28,6 +28,7 @@ class GazeboRosMechanumControlPrivate {
   public:
     gazebo::physics::ModelPtr model_;
     gazebo_ros::Node::SharedPtr ros_node_;
+    gazebo::common::Time last_update_time_;
     std::shared_ptr<tf2_ros::TransformBroadcaster> transform_broadcaster_;
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odometry_pub_;
@@ -35,7 +36,7 @@ class GazeboRosMechanumControlPrivate {
     void OnCmdVel(const geometry_msgs::msg::Twist::SharedPtr _msg);
     void SetVelocity(const double &_vel);
     void SetControlPIDs();
-    // void OnUpdate(const gazebo::common::UpdateInfo & _info);
+    void OnUpdate(const gazebo::common::UpdateInfo & _info);
 };
 
 GazeboRosMechanumControl::GazeboRosMechanumControl()
@@ -45,11 +46,11 @@ GazeboRosMechanumControl::~GazeboRosMechanumControl(){}
 
 void GazeboRosMechanumControl::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   impl_->model_ = _model;
-
-  std::cout<<"sdf is"<<std::endl;
   
   // Initialize ROS node
   impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
+
+  impl_->last_update_time_ = _model->GetWorld()->SimTime();
 
   // Get QoS profiles
   const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
@@ -63,15 +64,34 @@ void GazeboRosMechanumControl::Load(gazebo::physics::ModelPtr _model, sdf::Eleme
   impl_->transform_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(impl_->ros_node_);
 
   // Listen to the update event (broadcast every simulation iteration)
-  // impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
-  //   std::bind(&GazeboRosDiffDrivePrivate::OnUpdate, impl_.get(), std::placeholders::_1));
+  impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
+    std::bind(&GazeboRosDiffDrivePrivate::OnUpdate, impl_.get(), std::placeholders::_1));
 }
 
 void GazeboRosMechanumControl::Reset() {}
 
-// void GazeboRosMechanumControlPrivate::OnUpdate(const gazebo::common::UpdateInfo & _info) {
+void GazeboRosMechanumControlPrivate::OnUpdate(const gazebo::common::UpdateInfo & _info) {
+  double seconds_since_last_update = (_info.simTime - last_update_time_).Double();
+  if (seconds_since_last_update < update_period_) {
+    return;
+  }
+  UpdateOdometryWorld();
+  PublishOdometryTf(_info.simTime);
+  PublishWheelsTf(_info.simTime);
+  last_update_time_ = _info.simTime;
+}
 
-// }
+void GazeboRosMechanumControlPrivate::UpdateOdometryWorld() {
+  nav::msgs::msg::Odometry odom;
+  odom.pose.pose.position.x = 1;
+  odom.pose.pose.orientation.w = 1;
+  odom.twist.twist.angular.z = 5;
+
+}
+
+void GazeboRosMechanumControlPrivate::PublishOdometryTf(const gazebo::common::Time & _current_time) {
+
+}
 
 void GazeboRosMechanumControlPrivate::SetControlPIDs() {
   auto pid = gazebo::common::PID(1, 0, 0);

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from math import sin, cos, pi
 import rclpy
 from rclpy.node import Node

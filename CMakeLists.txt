@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(gazebo_plugin_tutorials)
+project(mechai_sims)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
@@ -11,32 +11,31 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 endif()
 
+######################Dependencies#############################
 # find dependencies
 find_package(ament_cmake REQUIRED)
-# find_package(gazebo REQUIRED)
+
+find_package(rclcpp REQUIRED)
+find_package(rclpy REQUIRED)
+
 find_package(gazebo_dev REQUIRED)
 find_package(gazebo_msgs REQUIRED)
 find_package(gazebo_ros REQUIRED)
+
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
-find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
+
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 
+######################CPP Part#############################
+include_directories(include)
+
 link_directories(${gazebo_dev_LIBRARY_DIRS})
-
-# include_directories(${GAZEBO_INCLUDE_DIRS})
-# link_directories(${GAZEBO_LIBRARY_DIRS})
-
-# add_library(test_control_plugin SHARED src/test_control_plugin.cpp)
-# target_link_libraries(test_control_plugin ${GAZEBO_LIBRARIES})
-
-# add_executable(test_transport src/test_transport.cpp)
-# target_link_libraries(test_transport ${GAZEBO_LIBRARIES})
 
 add_library(gazebo_ros_mechanum_control SHARED
   src/gazebo_ros_mechanum_control.cpp
@@ -53,6 +52,25 @@ ament_target_dependencies(gazebo_ros_mechanum_control
   "tf2_geometry_msgs"
   "tf2_ros"
 )
+
+#export libraries
 ament_export_libraries(gazebo_ros_mechanum_control)
 
+# Install Cpp executables
+# install(TARGETS
+#   cpp_executable
+#   DESTINATION lib/${PROJECT_NAME}
+# )
+
+######################Python Part#############################
+# Install Python modules
+ament_python_install_package(${PROJECT_NAME})
+
+# Install Python executables
+install(PROGRAMS
+  scripts/state_publisher.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()
+
