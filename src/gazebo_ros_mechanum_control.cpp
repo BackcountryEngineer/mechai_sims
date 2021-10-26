@@ -9,6 +9,7 @@
 #include <gazebo/physics/Joint.hh>
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/Model.hh>
+#include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -23,24 +24,30 @@
 #include <vector>
 
 
-namespace gazebo_plugin_tutorials {
+namespace mechai_sims {
 class GazeboRosMechanumControlPrivate {
   public:
     gazebo::physics::ModelPtr model_;
     gazebo_ros::Node::SharedPtr ros_node_;
     gazebo::common::Time last_update_time_;
+    nav_msgs::msg::Odometry odom_;
+    double update_period_;
     std::shared_ptr<tf2_ros::TransformBroadcaster> transform_broadcaster_;
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odometry_pub_;
     gazebo::event::ConnectionPtr update_connection_;
     void OnCmdVel(const geometry_msgs::msg::Twist::SharedPtr _msg);
+    void UpdateOdometryWorld(const gazebo::common::Time & _current_time);
+    void PublishOdometryTf(const gazebo::common::Time & _current_time);
     void SetVelocity(const double &_vel);
     void SetControlPIDs();
     void OnUpdate(const gazebo::common::UpdateInfo & _info);
 };
 
 GazeboRosMechanumControl::GazeboRosMechanumControl()
-: impl_(std::make_unique<GazeboRosMechanumControlPrivate>()) {}
+: impl_(std::make_unique<GazeboRosMechanumControlPrivate>()) {
+  impl_->update_period_ = 0.025;
+}
 
 GazeboRosMechanumControl::~GazeboRosMechanumControl(){}
 
@@ -65,7 +72,7 @@ void GazeboRosMechanumControl::Load(gazebo::physics::ModelPtr _model, sdf::Eleme
 
   // Listen to the update event (broadcast every simulation iteration)
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
-    std::bind(&GazeboRosDiffDrivePrivate::OnUpdate, impl_.get(), std::placeholders::_1));
+    std::bind(&GazeboRosMechanumControlPrivate::OnUpdate, impl_.get(), std::placeholders::_1));
 }
 
 void GazeboRosMechanumControl::Reset() {}
@@ -75,22 +82,40 @@ void GazeboRosMechanumControlPrivate::OnUpdate(const gazebo::common::UpdateInfo 
   if (seconds_since_last_update < update_period_) {
     return;
   }
-  UpdateOdometryWorld();
+  UpdateOdometryWorld(_info.simTime);
   PublishOdometryTf(_info.simTime);
-  PublishWheelsTf(_info.simTime);
   last_update_time_ = _info.simTime;
 }
 
-void GazeboRosMechanumControlPrivate::UpdateOdometryWorld() {
-  nav::msgs::msg::Odometry odom;
-  odom.pose.pose.position.x = 1;
-  odom.pose.pose.orientation.w = 1;
-  odom.twist.twist.angular.z = 5;
+void GazeboRosMechanumControlPrivate::UpdateOdometryWorld(const gazebo::common::Time & _current_time) {
+  auto pose = model_->WorldPose();
 
+  odom_.pose.pose.position = gazebo_ros::Convert<geometry_msgs::msg::Point>(pose.Pos());
+  odom_.pose.pose.orientation = gazebo_ros::Convert<geometry_msgs::msg::Quaternion>(pose.Rot());
+
+  auto linear = model_->WorldLinearVel();
+  odom_.twist.twist.angular.z = model_->WorldAngularVel().Z();
+
+  float yaw = pose.Rot().Yaw();
+  odom_.twist.twist.linear.x = cosf(yaw) * linear.X() + sinf(yaw) * linear.Y();
+  odom_.twist.twist.linear.y = cosf(yaw) * linear.Y() - sinf(yaw) * linear.X();
+
+  odom_.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
+  odom_.header.frame_id = "world";
+  odom_.child_frame_id = "mechanum_chasis";
+  
+  odometry_pub_->publish(odom_);
 }
 
 void GazeboRosMechanumControlPrivate::PublishOdometryTf(const gazebo::common::Time & _current_time) {
+  geometry_msgs::msg::TransformStamped msg;
+  msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
+  msg.header.frame_id = "world";
+  msg.child_frame_id = "mechanum_chasis";
+  msg.transform.translation = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(odom_.pose.pose.position);
+  msg.transform.rotation = odom_.pose.pose.orientation;
 
+  transform_broadcaster_->sendTransform(msg);
 }
 
 void GazeboRosMechanumControlPrivate::SetControlPIDs() {

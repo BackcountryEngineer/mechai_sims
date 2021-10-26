@@ -3,7 +3,7 @@
 #include <memory>
 
 
-namespace gazebo_plugin_tutorials {
+namespace mechai_sims {
   class GazeboRosMechanumControlPrivate;
   class GazeboRosMechanumControl : public gazebo::ModelPlugin {
   public:
