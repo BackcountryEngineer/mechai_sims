@@ -32,6 +32,13 @@ find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 
+######################Install util directories################
+install(DIRECTORY
+  launch
+  urdf
+  DESTINATION share/${PROJECT_NAME}/
+)
+
 ######################CPP Part#############################
 include_directories(include)
 

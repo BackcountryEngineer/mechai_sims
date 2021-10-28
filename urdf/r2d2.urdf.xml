@@ -156,7 +156,7 @@
     <visual>
       <origin xyz="0 0 -.1" />
       <geometry>
-        <cylinder radius=".02" length=".2" />
+        <cylinder radius=".02" len  th=".2" />
       </geometry>
       <material name="gray" />
 
