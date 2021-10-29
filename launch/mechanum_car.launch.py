@@ -33,7 +33,7 @@ def generate_launch_description():
         package="gazebo_ros",
         executable="spawn_entity.py",
         name="urdf_spawner",
-        arguments=["-topics", "robot_description","-entity", "mechanum_car"],
+        arguments=["-file", mechanum_car_xacro,"-entity", "mechanum_car"],
         output="screen"
     )
 
