@@ -1,28 +1,34 @@
 <?xml version="1.0" ?>
-<robot name="mechanum_car">
-  <link name="world"/>
-  <link name="mechanum_chasis">
+<robot name="mecanum_car" xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Define robot constants -->
+  <xacro:property name="chasis_width" value="0.15"/>
+  <xacro:property name="chasis_length" value="0.35"/>
+  <xacro:property name="chasis_height" value="0.08"/>
+
+  <!-- <link name="world"/> -->
+  <link name="mecanum_chasis">
+    <pose>0 0 0.1</pose>
     <visual>
       <geometry>
-        <box size="0.15 0.35 0.08"/>
+        <box size="${chasis_width} ${chasis_length} ${chasis_height}"/>
       </geometry>
     </visual>
     <collision>
-      <origin xyz="0 0.1 0" rpy="0 0 0" />
+    <origin xyz="0 0.1 0" rpy="0 0 0" />
       <geometry>
         <box size="0.15 0.35 0.08"/>
       </geometry>
     </collision>
     <inertial>
-      <mass value="100"/>
+      <mass value="1"/>
       <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
     </inertial>
   </link>
-  <joint name="world_to_base" type="fixed">
+  <!-- <joint name="world_to_base" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0.1"/>
     <parent link="world"/>
-    <child link="mechanum_chasis"/>
-  </joint>
+    <child link="mecanum_chasis"/>
+  </joint> -->
 
   <link name="front_left_wheel">
     <visual>
@@ -36,18 +42,18 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="100"/>
+      <mass value="1"/>
       <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
     </inertial>
   </link>
   <joint name="front_left_hinge" type="continuous">
-    <parent link="mechanum_chasis"/>
+    <parent link="mecanum_chasis"/>
     <child link="front_left_wheel"/>
     <axis xyz="0.0 0.0 1.0"/>
     <origin xyz="0.1 0.1 -0.03" rpy="0 -1.5708 0" />
   </joint>
 
-    <link name="front_right_wheel">
+  <link name="front_right_wheel">
     <visual>
       <geometry>
         <cylinder radius="0.07" length="0.05"/>
@@ -59,18 +65,18 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="100"/>
+      <mass value="1"/>
       <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
     </inertial>
   </link>
   <joint name="front_right_hinge" type="continuous">
-    <parent link="mechanum_chasis"/>
+    <parent link="mecanum_chasis"/>
     <child link="front_right_wheel"/>
     <axis xyz="0.0 0.0 1.0"/>
     <origin xyz="-0.1 0.1 -0.03" rpy="0 -1.5708 0" />
   </joint>
 
-    <link name="back_left_wheel">
+  <link name="back_left_wheel">
     <visual>
       <geometry>
         <cylinder radius="0.07" length="0.05"/>
@@ -82,18 +88,18 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="100"/>
+      <mass value="1"/>
       <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
     </inertial>
   </link>
   <joint name="back_left_hinge" type="continuous">
-    <parent link="mechanum_chasis"/>
+    <parent link="mecanum_chasis"/>
     <child link="back_left_wheel"/>
     <axis xyz="0.0 0.0 1.0"/>
     <origin xyz="0.1 -0.1 -0.03" rpy="0 -1.5708 0" />
   </joint>
 
-    <link name="back_right_wheel">
+  <link name="back_right_wheel">
     <visual>
       <geometry>
         <cylinder radius="0.07" length="0.05"/>
@@ -105,14 +111,19 @@
       </geometry>
     </collision>
     <inertial>
-      <mass value="100"/>
+      <mass value="1"/>
       <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
     </inertial>
   </link>
   <joint name="back_right_hinge" type="continuous">
-    <parent link="mechanum_chasis"/>
+    <parent link="mecanum_chasis"/>
     <child link="back_right_wheel"/>
     <axis xyz="0.0 0.0 1.0"/>
     <origin xyz="-0.1 -0.1 -0.03" rpy="0 -1.5708 0" />
   </joint>
+
+  <gazebo>
+    <plugin filename="libgazebo_ros_mecanum_control.so" name="gazebo_ros_mecanum_control">
+    </plugin>
+  </gazebo>
 </robot>

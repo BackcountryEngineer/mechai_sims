@@ -14,6 +14,7 @@ endif()
 ######################Dependencies#############################
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(xacro)
 
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
@@ -44,12 +45,12 @@ include_directories(include)
 
 link_directories(${gazebo_dev_LIBRARY_DIRS})
 
-add_library(gazebo_ros_mechanum_control SHARED
-  src/gazebo_ros_mechanum_control.cpp
+add_library(gazebo_ros_mecanum_control SHARED
+  src/gazebo_ros_mecanum_control.cpp
 )
 
-target_include_directories(gazebo_ros_mechanum_control PUBLIC include)
-ament_target_dependencies(gazebo_ros_mechanum_control
+target_include_directories(gazebo_ros_mecanum_control PUBLIC include)
+ament_target_dependencies(gazebo_ros_mecanum_control
   "gazebo_dev"
   "gazebo_ros"
   "geometry_msgs"
@@ -61,7 +62,7 @@ ament_target_dependencies(gazebo_ros_mechanum_control
 )
 
 #export libraries
-ament_export_libraries(gazebo_ros_mechanum_control)
+ament_export_libraries(gazebo_ros_mecanum_control)
 
 # Install Cpp executables
 # install(TARGETS

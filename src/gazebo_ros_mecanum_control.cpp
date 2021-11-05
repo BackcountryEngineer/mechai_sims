@@ -1,4 +1,4 @@
-#include <mechai_sims/gazebo_ros_mechanum_control.hpp>
+#include <mechai_sims/gazebo_ros_mecanum_control.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
@@ -25,7 +25,7 @@
 
 
 namespace mechai_sims {
-class GazeboRosMechanumControlPrivate {
+class GazeboRosMecanumControlPrivate {
   public:
     gazebo::physics::ModelPtr model_;
     gazebo_ros::Node::SharedPtr ros_node_;
@@ -44,14 +44,14 @@ class GazeboRosMechanumControlPrivate {
     void OnUpdate(const gazebo::common::UpdateInfo & _info);
 };
 
-GazeboRosMechanumControl::GazeboRosMechanumControl()
-: impl_(std::make_unique<GazeboRosMechanumControlPrivate>()) {
+GazeboRosMecanumControl::GazeboRosMecanumControl()
+: impl_(std::make_unique<GazeboRosMecanumControlPrivate>()) {
   impl_->update_period_ = 0.025;
 }
 
-GazeboRosMechanumControl::~GazeboRosMechanumControl(){}
+GazeboRosMecanumControl::~GazeboRosMecanumControl(){}
 
-void GazeboRosMechanumControl::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf) {
+void GazeboRosMecanumControl::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   impl_->model_ = _model;
   
   // Initialize ROS node
@@ -64,7 +64,7 @@ void GazeboRosMechanumControl::Load(gazebo::physics::ModelPtr _model, sdf::Eleme
 
   impl_->cmd_vel_sub_ =impl_->ros_node_->create_subscription<geometry_msgs::msg::Twist>(
     "cmd_vel", qos.get_subscription_qos("cmd_vel", rclcpp::QoS(1)), 
-    std::bind(&GazeboRosMechanumControlPrivate::OnCmdVel, impl_.get(), std::placeholders::_1));
+    std::bind(&GazeboRosMecanumControlPrivate::OnCmdVel, impl_.get(), std::placeholders::_1));
 
   impl_->odometry_pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>("odom", qos.get_publisher_qos("odom", rclcpp::QoS(1)));
 
@@ -72,12 +72,12 @@ void GazeboRosMechanumControl::Load(gazebo::physics::ModelPtr _model, sdf::Eleme
 
   // Listen to the update event (broadcast every simulation iteration)
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
-    std::bind(&GazeboRosMechanumControlPrivate::OnUpdate, impl_.get(), std::placeholders::_1));
+    std::bind(&GazeboRosMecanumControlPrivate::OnUpdate, impl_.get(), std::placeholders::_1));
 }
 
-void GazeboRosMechanumControl::Reset() {}
+void GazeboRosMecanumControl::Reset() {}
 
-void GazeboRosMechanumControlPrivate::OnUpdate(const gazebo::common::UpdateInfo & _info) {
+void GazeboRosMecanumControlPrivate::OnUpdate(const gazebo::common::UpdateInfo & _info) {
   double seconds_since_last_update = (_info.simTime - last_update_time_).Double();
   if (seconds_since_last_update < update_period_) {
     return;
@@ -87,7 +87,7 @@ void GazeboRosMechanumControlPrivate::OnUpdate(const gazebo::common::UpdateInfo 
   last_update_time_ = _info.simTime;
 }
 
-void GazeboRosMechanumControlPrivate::UpdateOdometryWorld(const gazebo::common::Time & _current_time) {
+void GazeboRosMecanumControlPrivate::UpdateOdometryWorld(const gazebo::common::Time & _current_time) {
   auto pose = model_->WorldPose();
 
   odom_.pose.pose.position = gazebo_ros::Convert<geometry_msgs::msg::Point>(pose.Pos());
@@ -102,23 +102,23 @@ void GazeboRosMechanumControlPrivate::UpdateOdometryWorld(const gazebo::common::
 
   odom_.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
   odom_.header.frame_id = "world";
-  odom_.child_frame_id = "mechanum_chasis";
+  odom_.child_frame_id = "mecanum_chasis";
   
   odometry_pub_->publish(odom_);
 }
 
-void GazeboRosMechanumControlPrivate::PublishOdometryTf(const gazebo::common::Time & _current_time) {
+void GazeboRosMecanumControlPrivate::PublishOdometryTf(const gazebo::common::Time & _current_time) {
   geometry_msgs::msg::TransformStamped msg;
   msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
   msg.header.frame_id = "world";
-  msg.child_frame_id = "mechanum_chasis";
+  msg.child_frame_id = "mecanum_chasis";
   msg.transform.translation = gazebo_ros::Convert<geometry_msgs::msg::Vector3>(odom_.pose.pose.position);
   msg.transform.rotation = odom_.pose.pose.orientation;
 
   transform_broadcaster_->sendTransform(msg);
 }
 
-void GazeboRosMechanumControlPrivate::SetControlPIDs() {
+void GazeboRosMecanumControlPrivate::SetControlPIDs() {
   auto pid = gazebo::common::PID(1, 0, 0);
   auto jointController = model_->GetJointController();
   for (auto joint : model_->GetJoints()) {
@@ -126,16 +126,16 @@ void GazeboRosMechanumControlPrivate::SetControlPIDs() {
   }
 }
 
-void GazeboRosMechanumControlPrivate::SetVelocity(const double &_vel) {
+void GazeboRosMecanumControlPrivate::SetVelocity(const double &_vel) {
   auto jointController = model_->GetJointController();
   for (auto joint : model_->GetJoints()) {
     jointController->SetVelocityTarget(joint->GetScopedName(), _vel);
   }
 }
 
-void GazeboRosMechanumControlPrivate::OnCmdVel(const geometry_msgs::msg::Twist::SharedPtr _msg) {
+void GazeboRosMecanumControlPrivate::OnCmdVel(const geometry_msgs::msg::Twist::SharedPtr _msg) {
   SetVelocity(_msg->linear.x);
 }
 
-GZ_REGISTER_MODEL_PLUGIN(GazeboRosMechanumControl)
+GZ_REGISTER_MODEL_PLUGIN(GazeboRosMecanumControl)
 }

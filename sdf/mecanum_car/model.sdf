@@ -137,6 +137,6 @@
       </axis>
     </joint>
 
-    <plugin name="gazebo_ros_mechanum_control" filename="libgazebo_ros_mechanum_control.so" />
+    <plugin name="gazebo_ros_mecanum_control" filename="libgazebo_ros_mecanum_control.so" />
   </model>
 </sdf>

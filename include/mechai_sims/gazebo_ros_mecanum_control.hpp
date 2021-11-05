@@ -4,14 +4,14 @@
 
 
 namespace mechai_sims {
-  class GazeboRosMechanumControlPrivate;
-  class GazeboRosMechanumControl : public gazebo::ModelPlugin {
+  class GazeboRosMecanumControlPrivate;
+  class GazeboRosMecanumControl : public gazebo::ModelPlugin {
   public:
     /// Constructor
-    GazeboRosMechanumControl();
+    GazeboRosMecanumControl();
 
     /// Destructor
-    ~GazeboRosMechanumControl();
+    ~GazeboRosMecanumControl();
 
   protected:
     // Documentation inherited
@@ -22,6 +22,6 @@ namespace mechai_sims {
 
   private:
     /// Private data pointer
-    std::unique_ptr<GazeboRosMechanumControlPrivate> impl_;
+    std::unique_ptr<GazeboRosMecanumControlPrivate> impl_;
   };
 }  // namespace gazebo_plugins

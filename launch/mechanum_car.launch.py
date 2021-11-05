@@ -16,11 +16,12 @@ def generate_launch_description():
             get_package_share_directory("gazebo_ros"), "launch"), "/gazebo.launch.py"]),
     )
 
-    mechanum_car_xacro = os.path.join(get_package_share_directory("mechai_sims"), "urdf", "mechanum_car.xacro.urdf")
+    mechanum_car_xacro = os.path.join(get_package_share_directory("mechai_sims"), "urdf", "mecanum_car.xacro.urdf")
 
     doc = xacro.parse(open(mechanum_car_xacro))
     xacro.process_doc(doc)
     params = {"robot_description": doc.toxml()}
+    print(params)
 
     robot_state_publisher = Node(
         package="robot_state_publisher",
@@ -33,7 +34,7 @@ def generate_launch_description():
         package="gazebo_ros",
         executable="spawn_entity.py",
         name="urdf_spawner",
-        arguments=["-file", mechanum_car_xacro,"-entity", "mechanum_car"],
+        arguments=["-file", mechanum_car_xacro,"-entity", "ros_mecanum_car"],
         output="screen"
     )
 
