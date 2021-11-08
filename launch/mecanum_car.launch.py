@@ -1,4 +1,5 @@
 import os
+from sys import stdin
 
 from ament_index_python.packages import get_package_share_directory
 
@@ -16,12 +17,11 @@ def generate_launch_description():
             get_package_share_directory("gazebo_ros"), "launch"), "/gazebo.launch.py"]),
     )
 
-    mechanum_car_xacro = os.path.join(get_package_share_directory("mechai_sims"), "urdf", "mecanum_car.xacro.urdf")
+    mecanum_car_xacro = os.path.join(get_package_share_directory("mechai_sims"), "urdf", "mecanum_car.xacro.urdf")
 
-    doc = xacro.parse(open(mechanum_car_xacro))
+    doc = xacro.parse(open(mecanum_car_xacro))
     xacro.process_doc(doc)
     params = {"robot_description": doc.toxml()}
-    print(params)
 
     robot_state_publisher = Node(
         package="robot_state_publisher",
@@ -34,12 +34,12 @@ def generate_launch_description():
         package="gazebo_ros",
         executable="spawn_entity.py",
         name="urdf_spawner",
-        arguments=["-file", mechanum_car_xacro,"-entity", "ros_mecanum_car"],
+        arguments=["-topic", "/robot_description", "-entity", "ros_mecanum_car"],
         output="screen"
     )
 
     return LaunchDescription([
         gazebo,
-        robot_state_publisher,
-        urdf_spawner
+        urdf_spawner,
+        robot_state_publisher
     ])
