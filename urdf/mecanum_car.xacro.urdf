@@ -11,6 +11,13 @@
   <xacro:property name="wheel_zoff" value="0.03"/>
   <xacro:property name="wheel_xoff" value="${2*wheel_width}"/>
 
+  <link name="base_footprint"/>
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="mecanum_chasis"/>
+    <origin xyz="0.0 0.0 ${-(wheel_radius+wheel_zoff)}" rpy="0 0 0"/>
+  </joint>
+
   <!-- robot model-->
   <link name="mecanum_chasis">
     <pose>0 0 0.1</pose>
@@ -29,13 +36,6 @@
       <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
     </inertial>
   </link>
-
-  <!-- <link name="base_footprint"/>
-  <joint name="base_joint" type="fixed">
-    <parent link="mecanum_chasis"/>
-    <child link="base_footprint"/>
-    <origin xyz="0.0 0.0 ${-(wheel_radius+wheel_zoff)}" rpy="0 0 0"/>
-  </joint> -->
 
   <xacro:macro name="wheel" params="prefix x_reflect y_reflect">
     <link name="${prefix}_wheel">
@@ -68,8 +68,13 @@
   <xacro:wheel prefix="wheel3" x_reflect="1" y_reflect="-1" />
   <xacro:wheel prefix="wheel4" x_reflect="-1" y_reflect="-1" />
 
-  <gazebo>
-    <plugin filename="libgazebo_ros_mecanum_control.so" name="gazebo_ros_mecanum_control">
+   <gazebo>
+    <plugin name="mecanum_control" filename="libgazebo_ros_planar_move.so">
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <odometryRate>20.0</odometryRate>
+      <robotBaseFrame>base_footprint</robotBaseFrame>
     </plugin>
   </gazebo>
 </robot>

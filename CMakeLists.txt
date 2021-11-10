@@ -37,6 +37,7 @@ find_package(tf2_ros REQUIRED)
 install(DIRECTORY
   launch
   urdf
+  config
   DESTINATION share/${PROJECT_NAME}/
 )
 
