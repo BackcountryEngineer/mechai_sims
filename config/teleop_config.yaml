@@ -5,8 +5,8 @@
       roll: -1
       yaw: 3
     axis_linear:
-      x: 0
-      y: 1
+      x: 1
+      y: 0
       z: -1
     enable_button: -1
     enable_turbo_button: -1
@@ -25,10 +25,10 @@
     scale_angular_turbo:
       pitch: 0.0
       roll: 0.0
-      yaw: 1.0
+      yaw: 0.5
     scale_linear:
-      x: 0.5
-      y: 0.5
+      x: 0.75
+      y: 0.75
       z: 0.0
     scale_linear_turbo:
       x: 0.0

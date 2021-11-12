@@ -1,21 +1,22 @@
 <?xml version="1.0" ?>
 <robot name="mecanum_car" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Define robot constants -->
-  <xacro:property name="chasis_width" value="0.15"/>
-  <xacro:property name="chasis_length" value="0.35"/>
+  <xacro:property name="chasis_width" value="0.35"/>
+  <xacro:property name="chasis_length" value="0.15"/>
   <xacro:property name="chasis_height" value="0.08"/>
 
   <xacro:property name="wheel_radius" value="0.07"/>
-  <xacro:property name="wheel_width" value="0.05"/>
-  <xacro:property name="wheel_ygap" value="${2*wheel_width}"/>
-  <xacro:property name="wheel_zoff" value="0.03"/>
-  <xacro:property name="wheel_xoff" value="${2*wheel_width}"/>
+  <xacro:property name="wheel_width" value="0.065"/>
+  <!-- <xacro:property name="wheel_ygap" value="0.12"/> -->
+  <xacro:property name="wheel_ygap" value="0.11"/>
+  <xacro:property name="wheel_zoff" value="0.012"/>
+  <xacro:property name="wheel_xoff" value="0.14"/>
 
   <link name="base_footprint"/>
   <joint name="base_joint" type="fixed">
     <parent link="base_footprint"/>
     <child link="mecanum_chasis"/>
-    <origin xyz="0.0 0.0 ${-(wheel_radius+wheel_zoff)}" rpy="0 0 0"/>
+    <origin xyz="0.0 0.0 ${-(0.07+wheel_zoff)}" rpy="0 0 0"/>
   </joint>
 
   <!-- robot model-->
@@ -37,14 +38,15 @@
     </inertial>
   </link>
 
-  <xacro:macro name="wheel" params="prefix x_reflect y_reflect">
+  <xacro:macro name="left_wheel" params="prefix x_reflect y_reflect">
     <link name="${prefix}_wheel">
       <visual>
         <geometry>
-          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+          <mesh filename="file:///home/jing/mechai_ws/src/mechai_sims/meshes/mecanum_wheel_left.STL" scale="0.0014 0.0014 0.0014"/>
         </geometry>
       </visual>
       <collision>
+        <origin rpy="${pi/2} 0 0"/>
         <geometry>
           <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
         </geometry>
@@ -59,14 +61,41 @@
       <parent link="mecanum_chasis"/>
       <child link="${prefix}_wheel"/>
       <axis xyz="0.0 0.0 1.0"/>
-      <origin xyz="${x_reflect*wheel_xoff} ${y_reflect*wheel_ygap} ${-wheel_zoff}" rpy="0 ${pi/2} 0" />
+      <origin xyz="${x_reflect*wheel_xoff} ${y_reflect*wheel_ygap} ${-wheel_zoff}" rpy="0 0 0" />
     </joint>
   </xacro:macro>
 
-  <xacro:wheel prefix="wheel1" x_reflect="1" y_reflect="1" />
-  <xacro:wheel prefix="wheel2" x_reflect="-1" y_reflect="1" />
-  <xacro:wheel prefix="wheel3" x_reflect="1" y_reflect="-1" />
-  <xacro:wheel prefix="wheel4" x_reflect="-1" y_reflect="-1" />
+  <xacro:macro name="right_wheel" params="prefix x_reflect y_reflect">
+    <link name="${prefix}_wheel">
+      <visual>
+        <geometry>
+          <mesh filename="file:///home/jing/mechai_ws/src/mechai_sims/meshes/mecanum_wheel_right.STL" scale="0.0014 0.0014 0.0014"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="${pi/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="1"/>
+        <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_hinge" type="continuous">
+      <parent link="mecanum_chasis"/>
+      <child link="${prefix}_wheel"/>
+      <axis xyz="0.0 0.0 1.0"/>
+      <origin xyz="${x_reflect*wheel_xoff} ${y_reflect*wheel_ygap} ${-wheel_zoff}" rpy="0 0 0" />
+    </joint>
+  </xacro:macro>
+
+  <xacro:left_wheel prefix="wheel1" x_reflect="1" y_reflect="1" />
+  <xacro:right_wheel prefix="wheel2" x_reflect="1" y_reflect="-1" />
+  <xacro:left_wheel prefix="wheel3" x_reflect="-1" y_reflect="-1" />
+  <xacro:right_wheel prefix="wheel4" x_reflect="-1" y_reflect="1" />
 
    <gazebo>
     <plugin name="mecanum_control" filename="libgazebo_ros_planar_move.so">
