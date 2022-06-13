@@ -72,6 +72,12 @@ ament_export_libraries(gazebo_ros_mecanum_control)
 #   DESTINATION lib/${PROJECT_NAME}
 # )
 
+# nav2 tutorial
+install(
+  DIRECTORY src launch rviz
+  DESTINATION share/${PROJECT_NAME}
+)
+
 ######################Python Part#############################
 # Install Python modules
 ament_python_install_package(${PROJECT_NAME})
