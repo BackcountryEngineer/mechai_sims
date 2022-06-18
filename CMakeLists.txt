@@ -74,7 +74,7 @@ ament_export_libraries(gazebo_ros_mecanum_control)
 
 # nav2 tutorial
 install(
-  DIRECTORY src launch rviz
+  DIRECTORY src launch rviz config world
   DESTINATION share/${PROJECT_NAME}
 )
 
