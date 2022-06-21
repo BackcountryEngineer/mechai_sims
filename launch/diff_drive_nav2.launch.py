@@ -3,11 +3,26 @@ from launch.substitutions import Command, LaunchConfiguration
 import launch_ros
 import os
 
+from ament_index_python.packages import get_package_share_directory
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+
 def generate_launch_description():
-    pkg_share = launch_ros.substitutions.FindPackageShare(package='mechai_sims').find('mechai_sims')
+    pkg_share = get_package_share_directory("mechai_sims")
+    # pkg_share = launch_ros.substitutions.FindPackageShare(package='mechai_sims').find('mechai_sims')
     default_model_path = os.path.join(pkg_share, 'urdf/diff_drive.xacro.urdf')
     default_rviz_config_path = os.path.join(pkg_share, 'rviz/urdf_config.rviz')
     world_path=os.path.join(pkg_share, 'world/sample_nav2.world'),
+
+    slam = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            pkg_share, "launch"), "/online_async_launch.py"]),
+    )
+
+    navigation = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            pkg_share, "launch"), "/navigation_launch.py"]),
+    )
 
     gazebo = launch.actions.ExecuteProcess(
         cmd=[
@@ -70,5 +85,7 @@ def generate_launch_description():
         robot_state_publisher_node,
         spawn_entity,
         robot_localization_node,
-        rviz_node
+        rviz_node,
+        slam,
+        navigation
     ])
