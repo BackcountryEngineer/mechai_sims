@@ -3,38 +3,58 @@
 <package format="3">
   <name>mechai_sims</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="jcdevspace@gmail.com">jing</maintainer>
+  <description>mechai simulations tools</description>
+  <maintainer email="abackcountryengineer@gmail.com">Jing</maintainer>
   <license>TODO: License declaration</license>
 
-  <depend>rclcpp</depend>
-  <depend>rclpy</depend>
-
-  <depend>geometry_msgs</depend>
-  <depend>nav_msgs</depend>
-  <depend>sensor_msgs</depend>
-  <depend>std_msgs</depend>
-  <depend>std_srvs</depend>
-  <depend>tf2_geometry_msgs</depend>
-  <depend>tf2_ros</depend>
-
-  <build_depend>gazebo_dev</build_depend>
-  <build_depend>gazebo_msgs</build_depend>
-  <build_depend>gazebo_ros</build_depend>
-
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
-
-  <exec_depend>xacro</exec_depend>
+  <author>Jing Chen</author>
 
   <buildtool_depend>ament_cmake_python</buildtool_depend>
 
-  <exec_depend>joint_state_publisher</exec_depend>
-  <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>robot_localization</exec_depend>
-  <exec_depend>rviz</exec_depend>
+  <depend>rclcpp</depend>
+  <depend>rclpy</depend>
+  <depend>rclcpp_action</depend>
+
+  <depend>control_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+
+  <!-- <depend>nav_msgs</depend>
+  <depend>sensor_msgs</depend>
+  
+  <depend>std_srvs</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>tf2_ros</depend>
+   -->
+
+  <!-- <build_depend>gazebo_dev</build_depend>
+  <build_depend>gazebo_msgs</build_depend>
+  <build_depend>gazebo_ros</build_depend> -->
+
   <exec_depend>xacro</exec_depend>
-  <exec_depend>nav2_route_server</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
+
+  <exec_depend>ros2_control</exec_depend>
+  <exec_depend>ros2_controllers</exec_depend>
+  <exec_depend>hardware_interface</exec_depend>
+
+  <exec_depend>diff_drive_controller</exec_depend>
+  <exec_depend>effort_controllers</exec_depend>
+  <exec_depend>joint_trajectory_controller</exec_depend>
+  <exec_depend>joint_state_broadcaster</exec_depend>
+  <exec_depend>velocity_controllers</exec_depend>
+
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>gazebo_ros2_control</exec_depend>
+
+  <!-- <exec_depend>joint_state_publisher</exec_depend> -->
+  <exec_depend>robot_state_publisher</exec_depend>
+  <!-- <exec_depend>robot_localization</exec_depend> -->
+  <!-- <exec_depend>nav2_route_server</exec_depend> -->
+
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

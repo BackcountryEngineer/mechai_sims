@@ -1,5 +1,5 @@
 import launch
-from launch.substitutions import Command, LaunchConfiguration
+from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution
 import launch_ros
 import os
 
@@ -9,10 +9,9 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 def generate_launch_description():
     pkg_share = get_package_share_directory("mechai_sims")
-    # pkg_share = launch_ros.substitutions.FindPackageShare(package='mechai_sims').find('mechai_sims')
-    default_model_path = os.path.join(pkg_share, 'urdf/diff_drive.xacro.urdf')
-    default_rviz_config_path = os.path.join(pkg_share, 'rviz/urdf_config.rviz')
-    world_path=os.path.join(pkg_share, 'world/sample_nav2.world'),
+    default_model_path = os.path.join(pkg_share, "urdf/diff_drive.xacro.urdf")
+    default_rviz_config_path = os.path.join(pkg_share, "rviz/urdf_config.rviz")
+    default_world_path=PathJoinSubstitution([pkg_share, "world/sample_nav2.world"]),
 
     slam = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
@@ -24,68 +23,82 @@ def generate_launch_description():
             pkg_share, "launch"), "/navigation_launch.py"]),
     )
 
-    gazebo = launch.actions.ExecuteProcess(
-        cmd=[
-            'gzserver', 
-            '--verbose', 
-            '-s', 'libgazebo_ros_init.so', 
-            '-s', 'libgazebo_ros_factory.so',
-            world_path
-        ], 
-        output='screen'
+    gazebo = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory("gazebo_ros"), "launch"), "/gazebo.launch.py"]),
     )
 
     robot_state_publisher_node = launch_ros.actions.Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        parameters=[{'robot_description': Command(['xacro ', LaunchConfiguration('model')])}]
+        package="robot_state_publisher",
+        executable="robot_state_publisher",
+        parameters=[{"robot_description": Command(["xacro ", LaunchConfiguration("model")])}]
     )
 
     joint_state_publisher_node = launch_ros.actions.Node(
-        package='joint_state_publisher',
-        executable='joint_state_publisher',
-        name='joint_state_publisher'
+        package="joint_state_publisher",
+        executable="joint_state_publisher",
+        name="joint_state_publisher"
     )
 
     rviz_node = launch_ros.actions.Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
-        output='screen',
-        arguments=['-d', LaunchConfiguration('rvizconfig')],
+        package="rviz2",
+        executable="rviz2",
+        name="rviz2",
+        output="screen",
+        arguments=["-d", LaunchConfiguration("rvizconfig")],
     )
 
     spawn_entity = launch_ros.actions.Node(
-        package='gazebo_ros',
-        executable='spawn_entity.py',
+        package="gazebo_ros",
+        executable="spawn_entity.py",
         arguments=[
-            '-entity', 'diff_drive', 
-            '-topic', 'robot_description'
+            "-entity", "diff_drive", 
+            "-topic", "robot_description"
         ],
-        output='screen'
+        output="screen"
     )
 
     robot_localization_node = launch_ros.actions.Node(
-       package='robot_localization',
-       executable='ekf_node',
-       name='ekf_filter_node',
-       output='screen',
-       parameters=[os.path.join(pkg_share, 'config/ekf.yaml'), {'use_sim_time': LaunchConfiguration('use_sim_time')}]
+       package="robot_localization",
+       executable="ekf_node",
+       name="ekf_filter_node",
+       output="screen",
+       parameters=[os.path.join(pkg_share, "config/ekf.yaml"), {"use_sim_time": LaunchConfiguration("use_sim_time")}]
     )
 
+    print(default_world_path)
+
     return launch.LaunchDescription([
-        launch.actions.DeclareLaunchArgument(name='model', default_value=default_model_path,
-                                            description='Absolute path to robot urdf file'),
-        launch.actions.DeclareLaunchArgument(name='rvizconfig', default_value=default_rviz_config_path,
-                                            description='Absolute path to rviz config file'),
-        launch.actions.DeclareLaunchArgument(name='use_sim_time', default_value='True',
-                                            description='Flag to enable use_sim_time'),
+        launch.actions.DeclareLaunchArgument(
+            name="model",
+            default_value=default_model_path,
+            description="Absolute path to robot urdf file"
+        ),
+        launch.actions.DeclareLaunchArgument(
+            "world", 
+            default_value=default_world_path,
+            description="Specify world file name"
+        ),
+        launch.actions.DeclareLaunchArgument(
+            name="rvizconfig", 
+            default_value=default_rviz_config_path,
+            description="Absolute path to rviz config file"
+        ),
+        launch.actions.DeclareLaunchArgument(
+            name="use_sim_time",
+            default_value="True",
+            description="Flag to enable use_sim_time"
+        ),
+        launch.actions.DeclareLaunchArgument(
+            name="gui", 
+            default_value="False",
+            description="Flag to enable gui"
+        ),
         gazebo,
-        # joint_state_publisher_node,
         robot_state_publisher_node,
         spawn_entity,
-        robot_localization_node,
-        rviz_node,
-        slam,
-        navigation
+        # robot_localization_node,
+        # rviz_node,
+        # slam,
+        # navigation
     ])
