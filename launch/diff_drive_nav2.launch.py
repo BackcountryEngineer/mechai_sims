@@ -7,6 +7,8 @@ from ament_index_python.packages import get_package_share_directory
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
+from launch.event_handlers import OnProcessExit
+
 def generate_launch_description():
     pkg_share = get_package_share_directory("mechai_sims")
     default_model_path = os.path.join(pkg_share, "urdf/diff_drive.xacro.urdf")
@@ -53,6 +55,18 @@ def generate_launch_description():
         output="screen"
     )
 
+    load_joint_state_interface = launch_ros.actions.Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_state_broadcaster", "-c", "/controller_manager"]
+    )
+
+    load_joint_control_interface = launch_ros.actions.Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["diff_drive_base_controller", "-c", "/controller_manager"]
+    )
+
     rviz_node = launch_ros.actions.Node(
         package="rviz2",
         executable="rviz2",
@@ -92,8 +106,25 @@ def generate_launch_description():
             default_value="False",
             description="Flag to enable gui"
         ),
+        launch.actions.RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=spawn_entity,
+                on_exit=[load_joint_state_interface],
+            )
+        ),
+        launch.actions.RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=load_joint_state_interface,
+                on_exit=[load_joint_control_interface],
+            )
+        ),
+        # launch.actions.RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=load_joint_control_interface,
+        #         on_exit=[rviz_node],
+        #     )
+        # ),
         gazebo,
         robot_state_publisher,
         spawn_entity,
-        # rviz_node,
     ])
