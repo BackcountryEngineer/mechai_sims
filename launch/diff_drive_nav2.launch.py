@@ -1,5 +1,5 @@
 import launch
-from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import Command, LaunchConfiguration
 import launch_ros
 import os
 
@@ -11,41 +11,36 @@ def generate_launch_description():
     pkg_share = get_package_share_directory("mechai_sims")
     default_model_path = os.path.join(pkg_share, "urdf/diff_drive.xacro.urdf")
     default_rviz_config_path = os.path.join(pkg_share, "rviz/urdf_config.rviz")
-    default_world_path=PathJoinSubstitution([pkg_share, "world/sample_nav2.world"]),
+    default_world_path = os.path.join(pkg_share, "world/sample_nav2.world")
+    default_controller_config_path = os.path.join(pkg_share, "config/diff_drive_controllers.yaml")
 
-    slam = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            pkg_share, "launch"), "/online_async_launch.py"]),
-    )
+    # localization = launch_ros.actions.Node(
+    #    package="robot_localization",
+    #    executable="ekf_node",
+    #    name="ekf_filter_node",
+    #    output="screen",
+    #    parameters=[os.path.join(pkg_share, "config/ekf.yaml"), {"use_sim_time": LaunchConfiguration("use_sim_time")}]
+    # )
 
-    navigation = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            pkg_share, "launch"), "/navigation_launch.py"]),
-    )
+    # slam = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource([os.path.join(
+    #         pkg_share, "launch"), "/online_async_launch.py"]),
+    # )
+
+    # navigation = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource([os.path.join(
+    #         pkg_share, "launch"), "/navigation_launch.py"]),
+    # )
 
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory("gazebo_ros"), "launch"), "/gazebo.launch.py"]),
     )
 
-    robot_state_publisher_node = launch_ros.actions.Node(
+    robot_state_publisher = launch_ros.actions.Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
         parameters=[{"robot_description": Command(["xacro ", LaunchConfiguration("model")])}]
-    )
-
-    joint_state_publisher_node = launch_ros.actions.Node(
-        package="joint_state_publisher",
-        executable="joint_state_publisher",
-        name="joint_state_publisher"
-    )
-
-    rviz_node = launch_ros.actions.Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        output="screen",
-        arguments=["-d", LaunchConfiguration("rvizconfig")],
     )
 
     spawn_entity = launch_ros.actions.Node(
@@ -58,15 +53,13 @@ def generate_launch_description():
         output="screen"
     )
 
-    robot_localization_node = launch_ros.actions.Node(
-       package="robot_localization",
-       executable="ekf_node",
-       name="ekf_filter_node",
-       output="screen",
-       parameters=[os.path.join(pkg_share, "config/ekf.yaml"), {"use_sim_time": LaunchConfiguration("use_sim_time")}]
+    rviz_node = launch_ros.actions.Node(
+        package="rviz2",
+        executable="rviz2",
+        name="rviz2",
+        output="screen",
+        arguments=["-d", LaunchConfiguration("rvizconfig")],
     )
-
-    print(default_world_path)
 
     return launch.LaunchDescription([
         launch.actions.DeclareLaunchArgument(
@@ -85,6 +78,11 @@ def generate_launch_description():
             description="Absolute path to rviz config file"
         ),
         launch.actions.DeclareLaunchArgument(
+            name="controller_config", 
+            default_value=default_controller_config_path,
+            description="Configuration for ros2 controllers"
+        ),
+        launch.actions.DeclareLaunchArgument(
             name="use_sim_time",
             default_value="True",
             description="Flag to enable use_sim_time"
@@ -95,10 +93,7 @@ def generate_launch_description():
             description="Flag to enable gui"
         ),
         gazebo,
-        robot_state_publisher_node,
+        robot_state_publisher,
         spawn_entity,
-        # robot_localization_node,
         # rviz_node,
-        # slam,
-        # navigation
     ])
