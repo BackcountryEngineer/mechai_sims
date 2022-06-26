@@ -70,9 +70,9 @@
 
   <!-- Wheels -->
   <xacro:macro name="wheel" params="prefix x_reflect y_reflect">
-    <link name="${prefix}_link">
+    <link name="${prefix}">
       <visual>
-        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
           <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
         </geometry>
@@ -81,7 +81,7 @@
         </material>
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
           <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
         </geometry>
@@ -92,9 +92,9 @@
 
     <joint name="${prefix}_joint" type="continuous">
       <parent link="base_link"/>
-      <child link="${prefix}_link"/>
-      <origin xyz="${x_reflect*wheel_xoff} ${y_reflect*(base_width/2+wheel_ygap)} ${-wheel_zoff}" rpy="0 0 0"/>
-      <axis xyz="0 1 0"/>
+      <child link="${prefix}"/>
+      <origin xyz="${x_reflect*wheel_xoff} ${y_reflect*(base_width/2+wheel_ygap)} ${-wheel_zoff}" rpy="-${pi/2} 0 0"/>
+      <axis xyz="0 0 1"/>
     </joint>
   </xacro:macro>
 
@@ -118,7 +118,7 @@
       </geometry>
     </collision>
 
-    <xacro:sphere_inertia m="0.5" r="${(wheel_radius+wheel_zoff-(base_height/2))}"/>
+    <xacro:sphere_inertia m="0.1" r="${(wheel_radius+wheel_zoff-(base_height/2))}"/>
   </link>
 
   <joint name="caster_joint" type="fixed">
