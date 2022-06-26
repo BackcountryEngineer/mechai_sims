@@ -1,7 +1,6 @@
 import launch
-from launch.substitutions import Command, LaunchConfiguration
+from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution
 import launch_ros
-import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch.actions import IncludeLaunchDescription
@@ -11,32 +10,32 @@ from launch.event_handlers import OnProcessExit
 
 def generate_launch_description():
     pkg_share = get_package_share_directory("mechai_sims")
-    default_model_path = os.path.join(pkg_share, "urdf/diff_drive.xacro.urdf")
-    default_rviz_config_path = os.path.join(pkg_share, "rviz/urdf_config.rviz")
-    default_world_path = os.path.join(pkg_share, "world/sample_nav2.world")
-    default_controller_config_path = os.path.join(pkg_share, "config/diff_drive_controllers.yaml")
+    default_model_path = PathJoinSubstitution([pkg_share, "urdf/diff_drive.xacro.urdf"])
+    default_rviz_config_path = PathJoinSubstitution([pkg_share, "rviz/urdf_config.rviz"])
+    default_world_path = PathJoinSubstitution([pkg_share, "world/sample_nav2.world"])
+    default_controller_config_path = PathJoinSubstitution([pkg_share, "config/diff_drive_controllers.yaml"])
 
     # localization = launch_ros.actions.Node(
     #    package="robot_localization",
     #    executable="ekf_node",
     #    name="ekf_filter_node",
     #    output="screen",
-    #    parameters=[os.path.join(pkg_share, "config/ekf.yaml"), {"use_sim_time": LaunchConfiguration("use_sim_time")}]
+    #    parameters=[PathJoinSubstitution([pkg_share, "config/ekf.yaml"]), {"use_sim_time": LaunchConfiguration("use_sim_time")}]
     # )
 
     # slam = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource([os.path.join(
-    #         pkg_share, "launch"), "/online_async_launch.py"]),
+    #     PythonLaunchDescriptionSource([PathJoinSubstitution([
+    #         pkg_share, "launch"]), "/online_async_launch.py"]),
     # )
 
     # navigation = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource([os.path.join(
-    #         pkg_share, "launch"), "/navigation_launch.py"]),
+    #     PythonLaunchDescriptionSource([PathJoinSubstitution([
+    #         pkg_share, "launch"]), "/navigation_launch.py"]),
     # )
 
     gazebo = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory("gazebo_ros"), "launch"), "/gazebo.launch.py"]),
+        PythonLaunchDescriptionSource([PathJoinSubstitution(
+            [get_package_share_directory("gazebo_ros"), "launch"]), "/gazebo.launch.py"]),
     )
 
     robot_state_publisher = launch_ros.actions.Node(
