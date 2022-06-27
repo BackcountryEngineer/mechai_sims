@@ -157,7 +157,7 @@
   </gazebo>
 
   <!-- IMU sensor -->
-  <!-- <link name="imu_link">
+  <link name="imu_link">
     <visual>
       <geometry>
         <box size="0.1 0.1 0.1"/>
@@ -246,10 +246,10 @@
         </linear_acceleration>
       </imu>
     </sensor>
-  </gazebo> -->
+  </gazebo>
 
   <!-- laser range scanner -->
-  <!-- <link name="lidar_link">
+  <link name="lidar_link">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="0.125"/>
@@ -310,10 +310,10 @@
         <frame_name>lidar_link</frame_name>
       </plugin>
     </sensor>
-  </gazebo> -->
+  </gazebo>
 
   <!-- depth camera -->
-  <!-- <link name="camera_link">
+  <link name="camera_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
@@ -384,5 +384,5 @@
         <hackBaseline>0</hackBaseline>
       </plugin>
     </sensor>
-  </gazebo> -->
+  </gazebo>
 </robot>

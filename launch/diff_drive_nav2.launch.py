@@ -15,23 +15,23 @@ def generate_launch_description():
     default_world_path = PathJoinSubstitution([pkg_share, "world/sample_nav2.world"])
     default_controller_config_path = PathJoinSubstitution([pkg_share, "config/diff_drive_controllers.yaml"])
 
-    # localization = launch_ros.actions.Node(
-    #    package="robot_localization",
-    #    executable="ekf_node",
-    #    name="ekf_filter_node",
-    #    output="screen",
-    #    parameters=[PathJoinSubstitution([pkg_share, "config/ekf.yaml"]), {"use_sim_time": LaunchConfiguration("use_sim_time")}]
-    # )
+    localization = launch_ros.actions.Node(
+       package="robot_localization",
+       executable="ekf_node",
+       name="ekf_filter_node",
+       output="screen",
+       parameters=[PathJoinSubstitution([pkg_share, "config/ekf.yaml"]), {"use_sim_time": LaunchConfiguration("use_sim_time")}]
+    )
 
-    # slam = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource([PathJoinSubstitution([
-    #         pkg_share, "launch"]), "/online_async_launch.py"]),
-    # )
+    slam = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([PathJoinSubstitution([
+            pkg_share, "launch"]), "/online_async_launch.py"]),
+    )
 
-    # navigation = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource([PathJoinSubstitution([
-    #         pkg_share, "launch"]), "/navigation_launch.py"]),
-    # )
+    navigation = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([PathJoinSubstitution([
+            pkg_share, "launch"]), "/navigation_launch.py"]),
+    )
 
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([PathJoinSubstitution(
@@ -117,13 +117,31 @@ def generate_launch_description():
                 on_exit=[load_joint_control_interface],
             )
         ),
-        # launch.actions.RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=load_joint_control_interface,
-        #         on_exit=[rviz_node],
-        #     )
-        # ),
+        launch.actions.RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=load_joint_control_interface,
+                on_exit=[localization],
+            )
+        ),
+        launch.actions.RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=load_joint_control_interface,
+                on_exit=[slam],
+            )
+        ),
+        launch.actions.RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=load_joint_control_interface,
+                on_exit=[navigation],
+            )
+        ),
+        launch.actions.RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=load_joint_control_interface,
+                on_exit=[rviz_node],
+            )
+        ),
         gazebo,
         robot_state_publisher,
-        spawn_entity,
+        spawn_entity
     ])
