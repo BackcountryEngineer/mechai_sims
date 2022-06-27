@@ -136,6 +136,7 @@ install(DIRECTORY
   config
   urdf
   world
+  rviz
   DESTINATION share/${PROJECT_NAME}/
 )
 
